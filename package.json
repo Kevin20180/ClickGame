@@ -1,0 +1,25 @@
+{
+  "name": "click-game",
+  "version": "0.1.0",
+  "description": "Click Game",
+  "keywords": [
+    "click",
+    "game",
+    "money",
+    "server"
+  ],
+  "license": "MIT",
+  "author": "Kevin",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "client:dev": "sh scripts/client.dev.sh"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.4"
+  },
+  "devDependencies": {
+    "eruda": "^3.4.3",
+    "typescript": "^5.9.3"
+  }
+}

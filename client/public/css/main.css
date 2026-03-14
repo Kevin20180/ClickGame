@@ -1,0 +1,72 @@
+
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: "Noto Sans", sans-serif;
+}
+header {
+    text-align: center;
+    background: gray;
+    padding: 20px;
+}
+header div {
+    color: white;
+    font-size: 25px;
+}
+
+#click, #store {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#click {
+    font-size: 150px;
+    user-select: none;
+}
+
+#store {
+    min-height: 100vh;
+}
+
+.sell_button {
+    margin-top: 25px;
+    min-width: 100px;
+    align-self: center;
+    font-size: 20px;
+    background: #1c85ff;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 10px;
+}
+
+.buy_button {
+    margin-top: 25px;
+    min-width: 100px;
+    align-self: center;
+    font-size: 20px;
+    background: blue;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 10px;
+}
+
+.buy_all_button {
+    align-self: center;
+    font-size: 20px;
+    background: none;
+    color: blue;
+    border: 2px solid blue;
+    border-radius: 7px;
+    padding: 8.5px;
+}
+
+#reset {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    color: red;
+}
