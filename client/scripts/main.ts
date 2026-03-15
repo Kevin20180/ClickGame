@@ -287,11 +287,11 @@ store.items = {
     .onClick(function() {
         let tick = this.game.ticks;
         
-        const item = game.store.items["autoClick"]!;
+        const item = this.game.store.items["autoClick"]!;
         while(this.game.money >= item.price) {
-            item.buy();
-            /*const autoClicker = this.game.autoClickers[this.game.autoClickers.length - 1];
-            if(autoClicker) autoClicker.tick = (tick++ % 20 || 20);*/
+            this.game.money -= item.price;
+            item.price += 12;
+            this.game.addAutoClicker(tick++ % 20 || 20);
         }
     }),
     
