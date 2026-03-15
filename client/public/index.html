@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Click Game</title>
-        <!--<script src="node_modules/eruda/eruda.js"></script>
-        <script>eruda.init();</script>-->
-        <link rel="stylesheet" href="./css/main.css" type="text/css" media="all" />
-    </head>
-    <body>
-        <header>
-            <div>Dinheiro: R$<span id="money">0</span></div>
-        </header>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Game</title>
+    <link rel="stylesheet" href="./css/main.css" type="text/css" media="all" />
+</head>
+<body>
+    <header>
+        <div>Dinheiro: R$ <span id="money">0</span></div>
+    </header>
+    
+    <section>
+        <div id="click"></div>
+    </section>
+    
+    <section id="store">
+        <button class="sell_button sell" id="sell_button">Vender</button>
+        <br>
+        <button class="buy_button auto_click" id="buy_auto_click"> Auto Clicker R$100</button>
+        <button class="buy_all_button auto_click" id="buy_all_auto_click">Comprar todos</button>
+        <br>
+        <button class="buy_button multiplier" id="buy_multiplier"> Multiplicador R$1000</button>
+        <!--<button class="buy_all_button multiplier">Comprar todos</button>-->
+    </section>
+    
+    <footer>
+        <p>Feito por Kevin</p>
         
-        <section id="click"></section>
-        
-        <section id="store">
-            <button class="sell_button sell" id="sell_button">Vender</button>
-            <br>
-            <button class="buy_button auto_click" id="buy_auto_click"> Auto Clicker R$100</button>
-            <button class="buy_all_button auto_click" id="buy_all_auto_click">Comprar todos</button>
-            <br>
-            <button class="buy_button multiplier" id="buy_multiplier"> Multiplicador R$1000</button>
-            <!--<button class="buy_all_button multiplier">Comprar todos</button>-->
-        </section>
-        
-        <section>
-            <button id="reset">Resetar</button>
-        </section>
-
-        <footer>
-            <p>Feito por Kevin</p>
-        </footer>
-        
-        <script src="./scripts/main.js"></script>
-    </body>
+        <button id="reset">Resetar</button>
+    </footer>
+    
+    <script src="./scripts/main.js"></script>
+</body>
 </html>

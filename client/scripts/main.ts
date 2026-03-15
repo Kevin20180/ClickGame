@@ -16,6 +16,7 @@ class Game {
     clicks: number;
     multiplier: number;
     autoClickers: AutoClicker[];
+    _oldClicksElementTextLength: number;
     
     constructor(
         moneyElement: HTMLSpanElement,
@@ -33,6 +34,8 @@ class Game {
         this.multiplier = 1;
         this.autoClickers = [];
         
+        this._oldClicksElementTextLength = 1;
+        
         clicksElement.addEventListener("click", () => {
             this.click();
         })
@@ -44,6 +47,12 @@ class Game {
             for(const autoClicker of this.autoClickers) {
                 if(autoClicker.tick !== tickInSecond) continue;
                 this.click();
+            }
+            
+            let clicksStr = this.clicks.toString();
+            if(this._oldClicksElementTextLength !== clicksStr.length) {
+                this.clicksElement.style.fontSize = `${160 - clicksStr.length * 10}px`;
+                this._oldClicksElementTextLength = clicksStr.length;
             }
             
             moneyElement.innerText = Math.floor(this.money).toString();
