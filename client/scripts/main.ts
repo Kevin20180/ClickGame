@@ -6,6 +6,7 @@ eruda.init();*/
 const resetButtonElement = document.querySelector("#reset") as HTMLButtonElement;
 
 class Game {
+    readonly id: string;
     readonly moneyElement: HTMLSpanElement;
     readonly clicksElement: HTMLDivElement;
     readonly store: Store;
@@ -15,14 +16,16 @@ class Game {
     money: number;
     clicks: number;
     multiplier: number;
-    autoClickers: AutoClicker[];
+    autoClickerTicks: Record<string, number>;
     _oldClicksElementTextLength: number;
     
     constructor(
+        id: string,
         moneyElement: HTMLSpanElement,
         clicksElement: HTMLDivElement,
         store: Store
     ) {
+        this.id = id;
         this.moneyElement = moneyElement;
         this.clicksElement = clicksElement;
         this.store = store;
@@ -32,7 +35,7 @@ class Game {
         this.money = 0;
         this.clicks = 0;
         this.multiplier = 1;
-        this.autoClickers = [];
+        this.autoClickerTicks = {};
         
         this._oldClicksElementTextLength = 1;
         
@@ -44,8 +47,9 @@ class Game {
             this.ticks++;
             
             let tickInSecond = this.ticks % 20 || 20;
-            for(const autoClicker of this.autoClickers) {
-                if(autoClicker.tick !== tickInSecond) continue;
+            let clicksInTick = Number(this.autoClickerTicks[tickInSecond]) || 0;
+            
+            for(let i = 0; i < clicksInTick; i++) {
                 this.click();
             }
             
@@ -58,10 +62,103 @@ class Game {
             moneyElement.innerText = Math.floor(this.money).toString();
             clicksElement.innerText = this.clicks.toString();
         }, 50)
+        
+        setInterval(() => {
+            this.save();
+        }, 400)
     }
     
     click() {
         this.clicks += this.multiplier;
+    }
+    
+    addAutoClicker(tick: number) {
+        if(!this.autoClickerTicks[tick]) this.autoClickerTicks[tick] = 0;
+        this.autoClickerTicks[tick]++;
+    }
+    
+    reset() {
+        this.ticks = 0;
+        this.money = 0;
+        this.clicks = 0;
+        this.multiplier = 1;
+        this.autoClickerTicks = {};
+        
+        for(const key in DEFAULT_ITEM_PRICES) {
+            const item = this.store.items[key];
+            if(!item) continue;
+            const defItemPrice = DEFAULT_ITEM_PRICES[key];
+            if(defItemPrice === undefined) continue;
+            
+            item.price = defItemPrice;
+        }
+    }
+    
+    save() {
+        let data: GameSaveData = {
+            ticks: this.ticks,
+            money: this.money,
+            clicks: this.clicks,
+            multiplier: this.multiplier,
+            auto_clicker_ticks: {},
+            store_item_prices: {}
+        }
+        
+        for(let tick = 1; tick <= 20; tick++) {
+            let clicksInTick = Number(this.autoClickerTicks[tick]) || 0;
+            data.auto_clicker_ticks![tick] = clicksInTick.toString();
+        }
+        
+        for(const key in this.store.items) {
+            const item = this.store.items[key]!;
+            data.store_item_prices![key] = item.price.toString();
+        }
+        
+        localStorage.setItem(`game.click_game#${this.id}`, JSON.stringify(data));
+    }
+    
+    loadSaveData(data: GameSaveData) {
+        if(typeof data !== "object" || Array.isArray(data)) throw TypeError("Argument 'data' must be of type GameSaveData.");
+        
+        this.ticks = Number(data.ticks) || this.ticks;
+        this.money = Number(data.money) || this.money;
+        this.clicks = Number(data.clicks) || this.clicks;
+        this.multiplier = Number(data.multiplier) || this.multiplier;
+        
+        if(typeof data.auto_clicker_ticks === "object" && !Array.isArray(data.auto_clicker_ticks)) {
+            for(let tick = 1; tick <= 20; tick++) {
+                let clicksInTick = Number(data.auto_clicker_ticks[tick]);
+                if(Number.isNaN(clicksInTick)) continue;
+                
+                this.autoClickerTicks[tick] = clicksInTick;
+            }
+        }
+        
+        if(typeof data.store_item_prices === "object" && !Array.isArray(data.store_item_prices)) {
+            for(let [key, priceStr] of Object.entries(data.store_item_prices)) {
+                const item = this.store.items[key];
+                if(!item) continue;
+                
+                let price = Number(priceStr) || item.price;
+                
+                if(item.price !== price) item.price = price;
+            }
+        }
+    }
+    
+    loadSave() {
+        let rawData = localStorage.getItem(`game.click_game#${this.id}`);
+        if(rawData == undefined) return;
+        
+        let data;
+        try {
+            data = JSON.parse(rawData);
+        } catch {}
+        
+        if(data === undefined) console.error("The game save appears to be corrupted and could not be loaded.");
+        if(Array.isArray(data)) return;
+        
+        this.loadSaveData(data);
     }
 }
 
@@ -149,9 +246,19 @@ class AutoClicker {
     }
 }
 
+interface GameSaveData {
+    ticks?: number,
+    money?: number,
+    clicks?: number,
+    multiplier?: number,
+    auto_clicker_ticks?: Record<string, string>,
+    store_item_prices?: Record<string, string>
+}
+
 const store = new Store(document.querySelector("#store") as HTMLDivElement, {});
 
 export const game = new Game(
+    "1",
     document.querySelector("#money") as HTMLSpanElement,
     document.querySelector("#click") as HTMLDivElement,
     store
@@ -171,10 +278,9 @@ store.items = {
     
     "autoClick": new StoreItem(document.querySelector(".buy_button.auto_click") as HTMLButtonElement, game, "Auto Clicker", DEFAULT_ITEM_PRICES.autoClick!)
     .onBuy(function(tick?: number) {
+        tick = tick ? (tick % 20 || 20) : (this.game.ticks % 20 || 20);
         this.price += 12;
-        
-        const autoClicker = new AutoClicker(tick ? (tick % 20 || 20) : (this.game.ticks % 20 || 20));
-        this.game.autoClickers.push(autoClicker);
+        this.game.addAutoClicker(tick);
     }),
     
     "autoClick.all": new StoreItem(document.querySelector(".buy_all_button.auto_click") as HTMLButtonElement, game, "Comprar todos", 0)
@@ -184,8 +290,8 @@ store.items = {
         const item = game.store.items["autoClick"]!;
         while(this.game.money >= item.price) {
             item.buy();
-            const autoClicker = this.game.autoClickers[this.game.autoClickers.length - 1];
-            if(autoClicker) autoClicker.tick = (tick++ % 20 || 20);
+            /*const autoClicker = this.game.autoClickers[this.game.autoClickers.length - 1];
+            if(autoClicker) autoClicker.tick = (tick++ % 20 || 20);*/
         }
     }),
     
@@ -196,66 +302,57 @@ store.items = {
     }),
 }
 
-export function reset() {
-    game.ticks = 0;
-    game.money = 0;
-    game.clicks = 0;
-    game.multiplier = 1;
-    game.autoClickers = [];
-    
-    for(const key in DEFAULT_ITEM_PRICES) {
-        const item = game.store.items[key];
-        if(!item) continue;
-        const defItemPrice = DEFAULT_ITEM_PRICES[key];
-        if(defItemPrice === undefined) continue;
-        
-        item.price = defItemPrice;
-    }
-}
-
 resetButtonElement.addEventListener("click", () => {
     let res = window.confirm("Deseja resetar o jogo?");
-    if(res) reset();
+    if(res) game.reset();
 })
 
-setInterval(() => {
-    localStorage.setItem("ticks", game.ticks.toString());
-    localStorage.setItem("money", game.money. toString());
-    localStorage.setItem("clicks", game.clicks.toString());
-    localStorage.setItem("multiplier", game.multiplier.toString());
-    localStorage.setItem("auto_clicker_ticks", JSON.stringify(game.autoClickers.map(a => a.tick)));
+function loadLegacySave() {
+    game.ticks = Number(localStorage.getItem("ticks")) || game.ticks;
+    game.money = Number(localStorage.getItem("money")) || game.money;
+    game.clicks = Number(localStorage.getItem("clicks")) || game.clicks;
+    game.multiplier = Number(localStorage.getItem("multiplier")) || game.multiplier;
+    
+    let localAutoClickerTicks: number[] | undefined = undefined;
+    try {
+        localAutoClickerTicks = JSON.parse(localStorage.getItem("auto_clicker_ticks") || "[]");
+    } catch {}
+    
+    if(Array.isArray(localAutoClickerTicks)) {
+        for(const tick of localAutoClickerTicks) {
+            /*const autoClicker = new AutoClicker(tick || 1);
+            game.autoClickers.push(autoClicker);*/
+            if(!game.autoClickerTicks[tick]) game.autoClickerTicks[tick] = 0;
+            game.autoClickerTicks[tick]++;
+        }
+    }
     
     for(const key in game.store.items) {
         const item = game.store.items[key]!;
-        localStorage.setItem(`store.${key}.price`, item.price.toString());
-    }
-}, 300)
-
-game.ticks = Number(localStorage.getItem("ticks")) || game.ticks;
-game.money = Number(localStorage.getItem("money")) || game.money;
-game.clicks = Number(localStorage.getItem("clicks")) || game.clicks;
-game.multiplier = Number(localStorage.getItem("multiplier")) || game.multiplier;
-
-let localAutoClickerTicks: number[] | undefined = undefined;
-try {
-    localAutoClickerTicks = JSON.parse(localStorage.getItem("auto_clicker_ticks") || "[]");
-} catch {}
-
-if(Array.isArray(localAutoClickerTicks)) {
-    for(const tick of localAutoClickerTicks) {
-        const autoClicker = new AutoClicker(tick || 1);
-        game.autoClickers.push(autoClicker);
+        
+        let price = Number(localStorage.getItem(`store.${key}.price`));
+        if(Number.isNaN(price)) continue;
+        
+        const defItemPrice = DEFAULT_ITEM_PRICES[key];
+        if(item.price !== price && price > (defItemPrice ?? 0)) item.price = price;
     }
 }
 
-for(const key in game.store.items) {
-    const item = game.store.items[key]!;
+function deleteLegacySave() {
+    localStorage.removeItem("ticks");
+    localStorage.removeItem("money");
+    localStorage.removeItem("clicks");
+    localStorage.removeItem("multiplier");
+    localStorage.removeItem("auto_clicker_ticks");
     
-    let price = Number(localStorage.getItem(`store.${key}.price`));
-    if(Number.isNaN(price)) continue;
-    
-    const defItemPrice = DEFAULT_ITEM_PRICES[key];
-    if(item.price !== price && price > (defItemPrice ?? 0)) item.price = price;
+    for(const key in game.store.items) {
+        const item = game.store.items[key]!;
+        localStorage.removeItem(`store.${key}.price`);
+    }
 }
+
+loadLegacySave();
+deleteLegacySave();
+game.loadSave();
 
 (window as any).game = game;
