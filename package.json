@@ -13,13 +13,15 @@
   "type": "module",
   "main": "server/index.js",
   "scripts": {
-    "client:dev": "sh scripts/client.dev.sh"
+    "client:dev": "sh scripts/client.dev.sh",
+    "client:bundle": "esbuild client/scripts/main.ts --bundle --outfile=client/public/scripts/main.js --format=iife --sourcemap=inline"
   },
   "dependencies": {
     "eventemitter3": "^5.0.4"
   },
   "devDependencies": {
     "eruda": "^3.4.3",
+    "esbuild": "^0.27.4",
     "typescript": "^5.9.3"
   }
 }

@@ -190,15 +190,6 @@ class StoreItem extends EventEmitter {
         this.game = game;
         this.name = name;
         
-        /*if(typeof onBuy === "function") {
-            element.addEventListener("click", () => {
-                if(game.money >= this.price) {
-                    game.money -= this.price;
-                    onBuy.call(this);
-                }
-            })
-        }*/
-        
         element.addEventListener("click", () => {
             this.emit("click");
             if(game.money >= this.price) {

@@ -9,7 +9,7 @@ body {
 }
 header {
     text-align: center;
-    background: #1c85ff;
+    background: #1a7ded;
     padding: 20px;
     /*box-shadow: 1px 1px 5px 0px black;*/
 }
@@ -29,12 +29,16 @@ header div {
     height: 150px;
 }
 
+#click:hover {
+    cursor: pointer;
+}
+
 #store {
     min-height: 100vh;
 }
 
-#store button {
-    /*box-shadow: 0.9px 0.9px 2.5px 0px #272727;*/
+#store button:hover {
+    cursor: pointer;
 }
 
 .sell_button {

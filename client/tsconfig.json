@@ -42,6 +42,6 @@
     "skipLibCheck": true,
     
     "noEmit": true,
-    "moduleResolution": "node"
+    "moduleResolution": "bundler"
   }
 }
