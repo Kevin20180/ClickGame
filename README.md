@@ -6,7 +6,7 @@ Click fast. Sell clicks for money, buy auto-clickers and multipliers to get even
 
 Run:
 ```
-node server/index.js
+npm run start
 ```
 
 Access the game at http://localhost:8080/
