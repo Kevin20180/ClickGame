@@ -27,6 +27,7 @@ header div {
     font-size: 150px;
     user-select: none;
     height: 150px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #click:hover {

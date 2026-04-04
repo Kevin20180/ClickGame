@@ -17,7 +17,7 @@
     "bundle": "esbuild scripts/main.ts --bundle --outfile=public/scripts/main.js --format=iife --sourcemap=inline",
     "build": "tsc && npm run bundle",
     "start": "http-server public",
-    "watch:ts": "tsc -w --preserveWatchOutput",
+    "watch:ts": "tsc -w",
     "watch:bundle": "npm run bundle -- --watch"
   },
   "dependencies": {
